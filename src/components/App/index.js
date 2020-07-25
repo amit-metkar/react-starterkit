@@ -1,4 +1,5 @@
 import App from "./component";
+import connect from "./connect";
 
 
-export default App
+export default connect(App)
