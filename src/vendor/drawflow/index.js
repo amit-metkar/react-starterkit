@@ -50,9 +50,9 @@ export default class Drawflow {
     this.container.addEventListener("mousemove", this.position.bind(this));
     this.container.addEventListener("mousedown", this.click.bind(this));
 
-    this.container.addEventListener("touchend", this.dragEnd.bind(this));
-    this.container.addEventListener("touchmove", this.position.bind(this));
-    this.container.addEventListener("touchstart", this.click.bind(this));
+    // this.container.addEventListener("touchend", this.dragEnd.bind(this));
+    // this.container.addEventListener("touchmove", this.position.bind(this));
+    // this.container.addEventListener("touchstart", this.click.bind(this));
 
     /* Context Menu */
     this.container.addEventListener("contextmenu", this.contextmenu.bind(this));
@@ -65,63 +65,63 @@ export default class Drawflow {
     this.container.addEventListener("input", this.updateNodeValue.bind(this));
 
     /* Mobile zoom */
-    this.container.onpointerdown = this.pointerdown_handler.bind(this);
-    this.container.onpointermove = this.pointermove_handler.bind(this);
-    this.container.onpointerup = this.pointerup_handler.bind(this);
-    this.container.onpointercancel = this.pointerup_handler.bind(this);
-    this.container.onpointerout = this.pointerup_handler.bind(this);
-    this.container.onpointerleave = this.pointerup_handler.bind(this);
+    // this.container.onpointerdown = this.pointerdown_handler.bind(this);
+    // this.container.onpointermove = this.pointermove_handler.bind(this);
+    // this.container.onpointerup = this.pointerup_handler.bind(this);
+    // this.container.onpointercancel = this.pointerup_handler.bind(this);
+    // this.container.onpointerout = this.pointerup_handler.bind(this);
+    // this.container.onpointerleave = this.pointerup_handler.bind(this);
 
     this.load();
   }
 
   /* Mobile zoom */
-  pointerdown_handler(ev) {
-    this.evCache.push(ev);
-  }
+  // pointerdown_handler(ev) {
+  //   this.evCache.push(ev);
+  // }
 
-  pointermove_handler(ev) {
-    for (var i = 0; i < this.evCache.length; i++) {
-      if (ev.pointerId == this.evCache[i].pointerId) {
-        this.evCache[i] = ev;
-        break;
-      }
-    }
+  // pointermove_handler(ev) {
+  //   for (var i = 0; i < this.evCache.length; i++) {
+  //     if (ev.pointerId == this.evCache[i].pointerId) {
+  //       this.evCache[i] = ev;
+  //       break;
+  //     }
+  //   }
 
-    if (this.evCache.length == 2) {
-      // Calculate the distance between the two pointers
-      var curDiff = Math.abs(this.evCache[0].clientX - this.evCache[1].clientX);
+  //   if (this.evCache.length == 2) {
+  //     // Calculate the distance between the two pointers
+  //     var curDiff = Math.abs(this.evCache[0].clientX - this.evCache[1].clientX);
 
-      if (this.prevDiff > 100) {
-        if (curDiff > this.prevDiff) {
-          // The distance between the two pointers has increased
+  //     if (this.prevDiff > 100) {
+  //       if (curDiff > this.prevDiff) {
+  //         // The distance between the two pointers has increased
 
-          this.zoom_in();
-        }
-        if (curDiff < this.prevDiff) {
-          // The distance between the two pointers has decreased
-          this.zoom_out();
-        }
-      }
-      this.prevDiff = curDiff;
-    }
-  }
+  //         this.zoom_in();
+  //       }
+  //       if (curDiff < this.prevDiff) {
+  //         // The distance between the two pointers has decreased
+  //         this.zoom_out();
+  //       }
+  //     }
+  //     this.prevDiff = curDiff;
+  //   }
+  // }
 
-  pointerup_handler(ev) {
-    this.remove_event(ev);
-    if (this.evCache.length < 2) {
-      this.prevDiff = -1;
-    }
-  }
-  remove_event(ev) {
-    // Remove this event from the target's cache
-    for (var i = 0; i < this.evCache.length; i++) {
-      if (this.evCache[i].pointerId == ev.pointerId) {
-        this.evCache.splice(i, 1);
-        break;
-      }
-    }
-  }
+  // pointerup_handler(ev) {
+  //   this.remove_event(ev);
+  //   if (this.evCache.length < 2) {
+  //     this.prevDiff = -1;
+  //   }
+  // }
+  // remove_event(ev) {
+  //   // Remove this event from the target's cache
+  //   for (var i = 0; i < this.evCache.length; i++) {
+  //     if (this.evCache[i].pointerId == ev.pointerId) {
+  //       this.evCache.splice(i, 1);
+  //       break;
+  //     }
+  //   }
+  // }
   /* End Mobile Zoom */
   load() {
     for (var key in this.drawflow.drawflow[this.module].data) {
@@ -162,6 +162,7 @@ export default class Drawflow {
         this.ele_selected = e.target.closest(".drawflow_content_node").parentElement;
       }
     }
+    console.log(this.ele_selected.classList[0])
     switch (this.ele_selected.classList[0]) {
       case "drawflow-node":
         if (this.node_selected != null) {
@@ -441,6 +442,7 @@ export default class Drawflow {
   }
 
   updateConnection(eX, eY) {
+    
     var path = this.connection_ele.children[0];
 
     var line_x = this.ele_selected.offsetWidth / 2 + this.line_path / 2 + this.ele_selected.parentElement.parentElement.offsetLeft + this.ele_selected.offsetLeft;
@@ -458,46 +460,47 @@ export default class Drawflow {
     path.setAttributeNS(null, "d", "M " + line_x + " " + line_y + " C " + hx1 + " " + line_y + " " + hx2 + " " + y + " " + x + "  " + y);
   }
 
-  addConnection(id_output, id_input, output_class, input_class) {
-    var nodeOneModule = this.getModuleFromNodeId(id_output);
-    var nodeTwoModule = this.getModuleFromNodeId(id_input);
-    if (nodeOneModule === nodeTwoModule) {
-      var dataNode = this.getNodeFromId(id_output);
-      var exist = false;
-      for (var checkOutput in dataNode.outputs[output_class].connections) {
-        var connectionSearch = dataNode.outputs[output_class].connections[checkOutput];
-        if (connectionSearch.node == id_input && connectionSearch.output == input_class) {
-          exist = true;
-        }
-      }
-      // Check connection exist
-      if (exist === false) {
-        //Create Connection
-        this.drawflow.drawflow[nodeOneModule].data[id_output].outputs[output_class].connections.push({ node: id_input, output: input_class });
-        this.drawflow.drawflow[nodeOneModule].data[id_input].inputs[input_class].connections.push({ node: id_output, input: output_class });
+  // addConnection(id_output, id_input, output_class, input_class) {
+  //   debugger
+  //   var nodeOneModule = this.getModuleFromNodeId(id_output);
+  //   var nodeTwoModule = this.getModuleFromNodeId(id_input);
+  //   if (nodeOneModule === nodeTwoModule) {
+  //     var dataNode = this.getNodeFromId(id_output);
+  //     var exist = false;
+  //     for (var checkOutput in dataNode.outputs[output_class].connections) {
+  //       var connectionSearch = dataNode.outputs[output_class].connections[checkOutput];
+  //       if (connectionSearch.node == id_input && connectionSearch.output == input_class) {
+  //         exist = true;
+  //       }
+  //     }
+  //     // Check connection exist
+  //     if (exist === false) {
+  //       //Create Connection
+  //       this.drawflow.drawflow[nodeOneModule].data[id_output].outputs[output_class].connections.push({ node: id_input, output: input_class });
+  //       this.drawflow.drawflow[nodeOneModule].data[id_input].inputs[input_class].connections.push({ node: id_output, input: output_class });
 
-        if (this.module === nodeOneModule) {
-          //Draw connection
-          var connection = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          path.classList.add("main-path");
-          path.setAttributeNS(null, "d", "");
-          // path.innerHTML = 'a';
-          connection.classList.add("connection");
-          connection.classList.add("node_in_node-" + id_input);
-          connection.classList.add("node_out_node-" + id_output);
-          connection.classList.add(output_class);
-          connection.classList.add(input_class);
-          connection.appendChild(path);
-          this.precanvas.appendChild(connection);
-          this.updateConnectionNodes("node-" + id_output);
-          this.updateConnectionNodes("node-" + id_input);
-        }
+  //       if (this.module === nodeOneModule) {
+  //         //Draw connection
+  //         var connection = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  //         var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  //         path.classList.add("main-path");
+  //         path.setAttributeNS(null, "d", "");
+  //         // path.innerHTML = 'a';
+  //         connection.classList.add("connection");
+  //         connection.classList.add("node_in_node-" + id_input);
+  //         connection.classList.add("node_out_node-" + id_output);
+  //         connection.classList.add(output_class);
+  //         connection.classList.add(input_class);
+  //         connection.appendChild(path);
+  //         this.precanvas.appendChild(connection);
+  //         this.updateConnectionNodes("node-" + id_output);
+  //         this.updateConnectionNodes("node-" + id_input);
+  //       }
 
-        this.dispatch("connectionCreated", { output_id: id_output, input_id: id_input, output_class: output_class, input_class: input_class });
-      }
-    }
-  }
+  //       this.dispatch("connectionCreated", { output_id: id_output, input_id: id_input, output_class: output_class, input_class: input_class });
+  //     }
+  //   }
+  // }
 
   updateConnectionNodes(id) {
     // Aquí nos quedamos;

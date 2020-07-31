@@ -52,7 +52,7 @@ class Canvas extends React.Component {
     });
 
     this.editor.on("mouseMove", function (position) {
-      console.log("Position mouse x:" + position.x + " y:" + position.y);
+      // console.log("Position mouse x:" + position.x + " y:" + position.y);
     });
 
     this.editor.on("nodeMoved", function (id) {
@@ -101,7 +101,7 @@ class Canvas extends React.Component {
 
     var node = `
       <div>
-        <div class="drag-item">${name}</div>
+        <div class="canvas-item">${name}</div>
       </div>
       `;
     console.log(name, pos_x, pos_y)

@@ -21,6 +21,9 @@ export default (theme) => {
         padding: "4px 10px",
         marginBottom: "5px",
       },
+      "& .canvas-item": {
+        textAlign: "center",
+      }
     },
   };
 };
