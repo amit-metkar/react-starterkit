@@ -28,12 +28,6 @@ export default class Drawflow {
     this.module = "Home";
     this.editor_mode = "edit";
     this.zoom = 1;
-    this.zoom_max = 1.6;
-    this.zoom_min = 0.5;
-
-    // Mobile
-    this.evCache = new Array();
-    this.prevDiff = -1;
   }
 
   start() {
@@ -50,79 +44,16 @@ export default class Drawflow {
     this.container.addEventListener("mousemove", this.position.bind(this));
     this.container.addEventListener("mousedown", this.click.bind(this));
 
-    // this.container.addEventListener("touchend", this.dragEnd.bind(this));
-    // this.container.addEventListener("touchmove", this.position.bind(this));
-    // this.container.addEventListener("touchstart", this.click.bind(this));
-
     /* Context Menu */
     this.container.addEventListener("contextmenu", this.contextmenu.bind(this));
     /* Delete */
     this.container.addEventListener("keydown", this.key.bind(this));
-
-    /* Zoom Mouse */
-    this.container.addEventListener("wheel", this.zoom_enter.bind(this));
     /* Update data Nodes */
     this.container.addEventListener("input", this.updateNodeValue.bind(this));
-
-    /* Mobile zoom */
-    // this.container.onpointerdown = this.pointerdown_handler.bind(this);
-    // this.container.onpointermove = this.pointermove_handler.bind(this);
-    // this.container.onpointerup = this.pointerup_handler.bind(this);
-    // this.container.onpointercancel = this.pointerup_handler.bind(this);
-    // this.container.onpointerout = this.pointerup_handler.bind(this);
-    // this.container.onpointerleave = this.pointerup_handler.bind(this);
 
     this.load();
   }
 
-  /* Mobile zoom */
-  // pointerdown_handler(ev) {
-  //   this.evCache.push(ev);
-  // }
-
-  // pointermove_handler(ev) {
-  //   for (var i = 0; i < this.evCache.length; i++) {
-  //     if (ev.pointerId == this.evCache[i].pointerId) {
-  //       this.evCache[i] = ev;
-  //       break;
-  //     }
-  //   }
-
-  //   if (this.evCache.length == 2) {
-  //     // Calculate the distance between the two pointers
-  //     var curDiff = Math.abs(this.evCache[0].clientX - this.evCache[1].clientX);
-
-  //     if (this.prevDiff > 100) {
-  //       if (curDiff > this.prevDiff) {
-  //         // The distance between the two pointers has increased
-
-  //         this.zoom_in();
-  //       }
-  //       if (curDiff < this.prevDiff) {
-  //         // The distance between the two pointers has decreased
-  //         this.zoom_out();
-  //       }
-  //     }
-  //     this.prevDiff = curDiff;
-  //   }
-  // }
-
-  // pointerup_handler(ev) {
-  //   this.remove_event(ev);
-  //   if (this.evCache.length < 2) {
-  //     this.prevDiff = -1;
-  //   }
-  // }
-  // remove_event(ev) {
-  //   // Remove this event from the target's cache
-  //   for (var i = 0; i < this.evCache.length; i++) {
-  //     if (this.evCache[i].pointerId == ev.pointerId) {
-  //       this.evCache.splice(i, 1);
-  //       break;
-  //     }
-  //   }
-  // }
-  /* End Mobile Zoom */
   load() {
     for (var key in this.drawflow.drawflow[this.module].data) {
       this.addNodeImport(this.drawflow.drawflow[this.module].data[key], this.precanvas);
@@ -393,42 +324,6 @@ export default class Drawflow {
     }
   }
 
-  zoom_enter(event, delta) {
-    if (event.ctrlKey) {
-      event.preventDefault();
-      if (event.deltaY > 0) {
-        // Zoom Out
-        this.zoom_out();
-      } else {
-        // Zoom In
-        this.zoom_in();
-      }
-      //this.precanvas.style.transform = "translate("+this.canvas_x+"px, "+this.canvas_y+"px) scale("+this.zoom+")";
-    }
-  }
-  zoom_refresh() {
-    this.dispatch("zoom", this.zoom);
-    this.precanvas.style.transform = "translate(" + this.canvas_x + "px, " + this.canvas_y + "px) scale(" + this.zoom + ")";
-  }
-  zoom_in() {
-    if (this.zoom < this.zoom_max) {
-      this.zoom += 0.1;
-      this.zoom_refresh();
-    }
-  }
-  zoom_out() {
-    if (this.zoom > this.zoom_min) {
-      this.zoom -= 0.1;
-      this.zoom_refresh();
-    }
-  }
-  zoom_reset() {
-    if (this.zoom != 1) {
-      this.zoom = 1;
-      this.zoom_refresh();
-    }
-  }
-
   drawConnection(ele) {
     var connection = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     this.connection_ele = connection;
@@ -459,48 +354,6 @@ export default class Drawflow {
     // console.log('M '+ line_x +' '+ line_y +' C '+ hx1 +' '+ line_y +' '+ hx2 +' ' + y +' ' + x +'  ' + y );
     path.setAttributeNS(null, "d", "M " + line_x + " " + line_y + " C " + hx1 + " " + line_y + " " + hx2 + " " + y + " " + x + "  " + y);
   }
-
-  // addConnection(id_output, id_input, output_class, input_class) {
-  //   debugger
-  //   var nodeOneModule = this.getModuleFromNodeId(id_output);
-  //   var nodeTwoModule = this.getModuleFromNodeId(id_input);
-  //   if (nodeOneModule === nodeTwoModule) {
-  //     var dataNode = this.getNodeFromId(id_output);
-  //     var exist = false;
-  //     for (var checkOutput in dataNode.outputs[output_class].connections) {
-  //       var connectionSearch = dataNode.outputs[output_class].connections[checkOutput];
-  //       if (connectionSearch.node == id_input && connectionSearch.output == input_class) {
-  //         exist = true;
-  //       }
-  //     }
-  //     // Check connection exist
-  //     if (exist === false) {
-  //       //Create Connection
-  //       this.drawflow.drawflow[nodeOneModule].data[id_output].outputs[output_class].connections.push({ node: id_input, output: input_class });
-  //       this.drawflow.drawflow[nodeOneModule].data[id_input].inputs[input_class].connections.push({ node: id_output, input: output_class });
-
-  //       if (this.module === nodeOneModule) {
-  //         //Draw connection
-  //         var connection = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  //         var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  //         path.classList.add("main-path");
-  //         path.setAttributeNS(null, "d", "");
-  //         // path.innerHTML = 'a';
-  //         connection.classList.add("connection");
-  //         connection.classList.add("node_in_node-" + id_input);
-  //         connection.classList.add("node_out_node-" + id_output);
-  //         connection.classList.add(output_class);
-  //         connection.classList.add(input_class);
-  //         connection.appendChild(path);
-  //         this.precanvas.appendChild(connection);
-  //         this.updateConnectionNodes("node-" + id_output);
-  //         this.updateConnectionNodes("node-" + id_input);
-  //       }
-
-  //       this.dispatch("connectionCreated", { output_id: id_output, input_id: id_input, output_class: output_class, input_class: input_class });
-  //     }
-  //   }
-  // }
 
   updateConnectionNodes(id) {
     // Aquí nos quedamos;
@@ -554,29 +407,6 @@ export default class Drawflow {
       // console.log('M '+ line_x +' '+ line_y +' C '+ hx1 +' '+ line_y +' '+ hx2 +' ' + y +' ' + x +'  ' + y );
       elems[item].children[0].setAttributeNS(null, "d", "M " + line_x + " " + line_y + " C " + hx1 + " " + line_y + " " + hx2 + " " + y + " " + x + "  " + y);
     });
-  }
-
-  /*selectElements(eX, eY) {
-    if(this.select_elements == null) {
-      var div = document.createElementNS('http://www.w3.org/2000/svg',"svg");
-      this.select_elements = div;
-      this.pos_click_x = eX;
-      this.pos_click_y = eY;
-        var rect = document.createElementNS('http://www.w3.org/2000/svg',"rect");
-        rect.setAttributeNS(null, 'd', '');
-      // rect.innerHTML = 'a';
-      div.classList.add("selectbox");
-      div.appendChild(rect);
-      this.precanvas.appendChild(div);
-    }
-
-    this.select_elements.children[0].setAttributeNS(null, 'x', this.pos_click_x - this.precanvas.offsetLeft - this.canvas_x);
-    this.select_elements.children[0].setAttributeNS(null, 'y', this.pos_click_y - this.precanvas.offsetTop - this.canvas_y);
-    this.select_elements.children[0].setAttributeNS(null, 'width', eX - this.pos_click_x);
-    this.select_elements.children[0].setAttributeNS(null, 'height', eY - this.pos_click_y);
-  }*/
-  registerNode(name, html, props = null, options = null) {
-    this.noderegister[name] = { html: html, props: props, options: options };
   }
 
   getNodeFromId(id) {
@@ -638,14 +468,7 @@ export default class Drawflow {
       content.innerHTML = html;
     } else if (typenode === true) {
       content.appendChild(this.noderegister[html].html.cloneNode(true));
-    } else {
-      let wrapper = new this.render({
-        render: (h) => h(this.noderegister[html].html, { props: this.noderegister[html].props }),
-        ...this.noderegister[html].options,
-      }).$mount();
-      //
-      content.appendChild(wrapper.$el);
-    }
+    } 
 
     Object.entries(data).forEach(function (key, value) {
       if (typeof key[1] === "object") {
@@ -757,6 +580,7 @@ export default class Drawflow {
     } else if (dataNode.typenode === true) {
       content.appendChild(this.noderegister[dataNode.html].html.cloneNode(true));
     } else {
+      debugger
       let wrapper = new this.render({
         render: (h) => h(this.noderegister[dataNode.html].html, { props: this.noderegister[dataNode.html].props }),
         ...this.noderegister[dataNode.html].options,
@@ -808,173 +632,6 @@ export default class Drawflow {
         this.drawflow.drawflow[this.module].data[event.target.closest(".drawflow_content_node").parentElement.id.slice(5)].data[attr[i].nodeName.slice(3)] = event.target.value;
       }
     }
-  }
-
-  addNodeInput(id) {
-    var moduleName = this.getModuleFromNodeId(id);
-    const infoNode = this.getNodeFromId(id);
-    const numInputs = Object.keys(infoNode.inputs).length;
-    if (this.module === moduleName) {
-      //Draw input
-      const input = document.createElement("div");
-      input.classList.add("input");
-      input.classList.add("input_" + (numInputs + 1));
-      const parent = document.querySelector("#node-" + id + " .inputs");
-      parent.appendChild(input);
-      this.updateConnectionNodes("node-" + id);
-    }
-    this.drawflow.drawflow[moduleName].data[id].inputs["input_" + (numInputs + 1)] = { connections: [] };
-  }
-
-  addNodeOutput(id) {
-    var moduleName = this.getModuleFromNodeId(id);
-    const infoNode = this.getNodeFromId(id);
-    const numOutputs = Object.keys(infoNode.outputs).length;
-    if (this.module === moduleName) {
-      //Draw output
-      const output = document.createElement("div");
-      output.classList.add("output");
-      output.classList.add("output_" + (numOutputs + 1));
-      const parent = document.querySelector("#node-" + id + " .outputs");
-      parent.appendChild(output);
-      this.updateConnectionNodes("node-" + id);
-    }
-    this.drawflow.drawflow[moduleName].data[id].outputs["output_" + (numOutputs + 1)] = { connections: [] };
-  }
-
-  removeNodeInput(id, input_class) {
-    var moduleName = this.getModuleFromNodeId(id);
-    const infoNode = this.getNodeFromId(id);
-    if (this.module === moduleName) {
-      document.querySelector("#node-" + id + " .inputs .input." + input_class).remove();
-    }
-    const removeInputs = [];
-    Object.keys(infoNode.inputs[input_class].connections).map(function (key, index) {
-      const id_output = infoNode.inputs[input_class].connections[index].node;
-      const output_class = infoNode.inputs[input_class].connections[index].input;
-      removeInputs.push({ id_output, id, output_class, input_class });
-    });
-    // Remove connections
-    removeInputs.forEach((item, i) => {
-      this.removeSingleConnection(item.id_output, item.id, item.output_class, item.input_class);
-    });
-
-    delete this.drawflow.drawflow[moduleName].data[id].inputs[input_class];
-
-    // Update connection
-    const connections = [];
-    const connectionsInputs = this.drawflow.drawflow[moduleName].data[id].inputs;
-    Object.keys(connectionsInputs).map(function (key, index) {
-      connections.push(connectionsInputs[key]);
-    });
-    this.drawflow.drawflow[moduleName].data[id].inputs = {};
-    const input_class_id = input_class.slice(6);
-    let nodeUpdates = [];
-    connections.forEach((item, i) => {
-      item.connections.forEach((itemx, f) => {
-        nodeUpdates.push(itemx);
-      });
-      this.drawflow.drawflow[moduleName].data[id].inputs["input_" + (i + 1)] = item;
-    });
-    nodeUpdates = new Set(nodeUpdates.map((e) => JSON.stringify(e)));
-    nodeUpdates = Array.from(nodeUpdates).map((e) => JSON.parse(e));
-
-    if (this.module === moduleName) {
-      const eles = document.querySelectorAll("#node-" + id + " .inputs .input");
-      eles.forEach((item, i) => {
-        const id_class = item.classList[1].slice(6);
-        if (input_class_id < id_class) {
-          item.classList.remove("input_" + id_class);
-          item.classList.add("input_" + (id_class - 1));
-        }
-      });
-    }
-
-    nodeUpdates.forEach((itemx, i) => {
-      this.drawflow.drawflow[moduleName].data[itemx.node].outputs[itemx.input].connections.forEach((itemz, g) => {
-        if (itemz.node == id) {
-          const output_id = itemz.output.slice(6);
-          if (input_class_id < output_id) {
-            if (this.module === moduleName) {
-              const ele = document.querySelector(".connection.node_in_node-" + id + ".node_out_node-" + itemx.node + "." + itemx.input + ".input_" + output_id);
-              ele.classList.remove("input_" + output_id);
-              ele.classList.add("input_" + (output_id - 1));
-            }
-            this.drawflow.drawflow[moduleName].data[itemx.node].outputs[itemx.input].connections[g] = { node: itemz.node, output: "input_" + (output_id - 1) };
-          }
-        }
-      });
-    });
-    this.updateConnectionNodes("node-" + id);
-  }
-
-  removeNodeOutput(id, output_class) {
-    var moduleName = this.getModuleFromNodeId(id);
-    const infoNode = this.getNodeFromId(id);
-    if (this.module === moduleName) {
-      document.querySelector("#node-" + id + " .outputs .output." + output_class).remove();
-    }
-    const removeOutputs = [];
-    Object.keys(infoNode.outputs[output_class].connections).map(function (key, index) {
-      const id_input = infoNode.outputs[output_class].connections[index].node;
-      const input_class = infoNode.outputs[output_class].connections[index].output;
-      removeOutputs.push({ id, id_input, output_class, input_class });
-    });
-    // Remove connections
-    removeOutputs.forEach((item, i) => {
-      this.removeSingleConnection(item.id, item.id_input, item.output_class, item.input_class);
-    });
-
-    delete this.drawflow.drawflow[moduleName].data[id].outputs[output_class];
-
-    // Update connection
-    const connections = [];
-    const connectionsOuputs = this.drawflow.drawflow[moduleName].data[id].outputs;
-    Object.keys(connectionsOuputs).map(function (key, index) {
-      connections.push(connectionsOuputs[key]);
-    });
-    this.drawflow.drawflow[moduleName].data[id].outputs = {};
-    const output_class_id = output_class.slice(7);
-    let nodeUpdates = [];
-    connections.forEach((item, i) => {
-      item.connections.forEach((itemx, f) => {
-        nodeUpdates.push(itemx);
-      });
-      this.drawflow.drawflow[moduleName].data[id].outputs["output_" + (i + 1)] = item;
-    });
-    nodeUpdates = new Set(nodeUpdates.map((e) => JSON.stringify(e)));
-    nodeUpdates = Array.from(nodeUpdates).map((e) => JSON.parse(e));
-
-    if (this.module === moduleName) {
-      const eles = document.querySelectorAll("#node-" + id + " .outputs .output");
-      eles.forEach((item, i) => {
-        const id_class = item.classList[1].slice(7);
-        if (output_class_id < id_class) {
-          item.classList.remove("output_" + id_class);
-          item.classList.add("output_" + (id_class - 1));
-        }
-      });
-    }
-
-    nodeUpdates.forEach((itemx, i) => {
-      this.drawflow.drawflow[moduleName].data[itemx.node].inputs[itemx.output].connections.forEach((itemz, g) => {
-        if (itemz.node == id) {
-          const input_id = itemz.input.slice(7);
-          if (output_class_id < input_id) {
-            if (this.module === moduleName) {
-              const ele = document.querySelector(".connection.node_in_node-" + itemx.node + ".node_out_node-" + id + ".output_" + input_id + "." + itemx.output);
-              ele.classList.remove("output_" + input_id);
-              ele.classList.remove(itemx.output);
-              ele.classList.add("output_" + (input_id - 1));
-              ele.classList.add(itemx.output);
-            }
-            this.drawflow.drawflow[moduleName].data[itemx.node].inputs[itemx.output].connections[g] = { node: itemz.node, input: "output_" + (input_id - 1) };
-          }
-        }
-      });
-    });
-
-    this.updateConnectionNodes("node-" + id);
   }
 
   removeNodeId(id) {
@@ -1134,6 +791,7 @@ export default class Drawflow {
     this.precanvas.innerHTML = "";
     this.drawflow = { drawflow: { Home: { data: {} } } };
   }
+  
   export() {
     return JSON.parse(JSON.stringify(this.drawflow));
   }
