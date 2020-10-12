@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core";
 import style from "./style";
-import Canvas from "../../components/Canvas";
 
 class App extends React.Component {
   componentDidMount() {
@@ -13,9 +12,8 @@ class App extends React.Component {
     const { isAppReady, classes } = this.props;
     return (
       <div className={classes.root}>
-        <header className="App-header">Counter {isAppReady ? "app is ready!" : "app is not ready!"}</header>
+        <header className="App-header">React Starterkit {isAppReady ? "app is ready!" : "app is not ready!"}</header>
         <hr color="darkgray" size="1"></hr>
-        <Canvas></Canvas>
       </div>
     );
   }
